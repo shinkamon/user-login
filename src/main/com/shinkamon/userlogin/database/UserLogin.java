@@ -1,19 +1,23 @@
 package com.shinkamon.userlogin.database;
 
 import com.shinkamon.userlogin.support.Hash;
+import com.shinkamon.userlogin.support.InputReader;
 
+import java.io.IOException;
 import java.sql.*;
-import java.util.Scanner;
 
 /**
- *
+ * Handles user login using static methods.
+ * Enables the registration of new users as well as authenticating existing users.
  */
 public class UserLogin {
     /**
-     *
-     * @param username
-     * @param passwordHash
-     * @return
+     * Helper method to check whether a username and a hashed password are valid.
+     * E.g. the username belongs to a registered user and the hashed password is the
+     * correct password associated with that username.
+     * @param username the username to validate.
+     * @param passwordHash the hashed password to validate.
+     * @return whether the credentials are valid or not as a boolean.
      */
     private static boolean isValidCredentials(final String username, final String passwordHash) {
         try (Connection connection = Database.INSTANCE.getConnection()) {
@@ -34,11 +38,13 @@ public class UserLogin {
     }
 
     /**
-     *
-     * @param username
-     * @param connection
-     * @return
-     * @throws SQLException
+     * Helper method that checks whether a username is registered. E.g. checks whether the username is
+     * in the database. Takes an already established {@link java.sql.Connection} to the database as a
+     * parameter to avoid opening a new connection.
+     * @param username the username to check.
+     * @param connection a connection to the database.
+     * @return whether the username exists or not as a boolean.
+     * @throws SQLException if a database access error occurs.
      */
     private static boolean hasUser(final String username, final Connection connection) throws SQLException {
         String query = "SELECT COUNT(*) FROM users WHERE username = ?";
@@ -50,13 +56,15 @@ public class UserLogin {
     }
 
     /**
-     *
-     * @param username
-     * @param passwordHash
-     * @param passwordSalt
-     * @return
+     * Helper method to try to add a new user to the database. Will fail if a user with the supplied username
+     * is already registered in the database.
+     * @param username the username to register.
+     * @param passwordHash the hashed password to register.
+     * @param passwordSalt the salt needed to generate the hashed password.
+     * @return whether the user was successfully added or not as a boolean.
      */
-    private static boolean addUserToDB(final String username, final String passwordHash, final String passwordSalt) {
+    private static boolean addUserToDatabase(final String username, final String passwordHash,
+                                             final String passwordSalt) {
         try (Connection connection = Database.INSTANCE.getConnection()) {
             if (!hasUser(username, connection)) {
                 String query = "INSERT INTO users VALUES(?, ?, ?)";
@@ -76,10 +84,10 @@ public class UserLogin {
     }
 
     /**
-     *
-     * @param in
+     * Helper method to register a new user.
+     * @throws IOException if an I/O error occurs.
      */
-    private static void addNewUser(Scanner in) {
+    private static void addNewUser() throws IOException {
         String username;
         String passwordHash;
         String passwordSalt = Hash.getSalt();
@@ -87,16 +95,19 @@ public class UserLogin {
         do {
             System.out.println("Enter a new username and password to register.");
             System.out.print("  username: ");
-            username = in.nextLine();
+            username = InputReader.readLine();
             System.out.print("  password: ");
-            passwordHash = Hash.getSHA512Hash(in.nextLine(), passwordSalt);
-        } while (!addUserToDB(username,  passwordHash, passwordSalt));
+            // since System.console doesn't work in an IDE we can't just use Console#readPassword()
+            // instead we use our own reader to account for this while still masking input when run from a console
+            passwordHash = Hash.getSHA512Hash(InputReader.readPassword(), passwordSalt);
+        } while (!addUserToDatabase(username,  passwordHash, passwordSalt));
     }
 
     /**
-     *
-     * @param username
-     * @return
+     * Helper method to get the salt needed to generate the hashed password associated with the
+     * supplied username. If no such username exists an empty String will be returned.
+     * @param username the username associated with the salt.
+     * @return the salt as a String, or an empty String if the supplied username doesn't exist.
      */
     private static String getSalt(final String username) {
         try (Connection connection = Database.INSTANCE.getConnection()) {
@@ -117,23 +128,24 @@ public class UserLogin {
     }
 
     /**
-     *
+     * Enables a user to log in by entering their username and password.
+     * Also allows for the registration of new users.
+     * @throws IOException if an I/O error occurs.
      */
-    public static void login() {
-        Scanner in = new Scanner(System.in);
+    public static void login() throws IOException {
         String username;
         String passwordHash;
 
         System.out.print("Would you like a register a new user? Y/N: ");
-        if (in.nextLine().equalsIgnoreCase("y")) {
-            addNewUser(in);
+        if (InputReader.readLine().equalsIgnoreCase("y")) {
+            addNewUser();
         }
 
         System.out.println("Enter your username and password to log in.");
         System.out.print("  username: ");
-        username = in.nextLine();
+        username = InputReader.readLine();
         System.out.print("  password: ");
-        passwordHash = Hash.getSHA512Hash(in.nextLine(), getSalt(username));
+        passwordHash = Hash.getSHA512Hash(InputReader.readPassword(), getSalt(username));
 
         if (isValidCredentials(username, passwordHash)) {
             System.out.println("Authenticated.");

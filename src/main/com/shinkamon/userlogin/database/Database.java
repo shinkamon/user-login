@@ -2,6 +2,7 @@ package com.shinkamon.userlogin.database;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.shinkamon.userlogin.support.InputReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,37 +13,40 @@ import java.nio.file.Paths;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 /**
- *
+ * Singleton class that provides access to a database for registered users. Access is provided through the
+ * public field INSTANCE.
  */
-public class Database {
+public final class Database {
+    /**
+     * The single instance of the class, through which methods are accessible.
+     */
     public static final Database INSTANCE = new Database();
     private String name;
     private String url;
 
     private Database() {
-        Path path = Paths.get("resources/dbinfo.json");
+        Path path = Paths.get("resources/database-info.json");
         Gson gson = new Gson();
         try {
             String json = Files.readString(path);
             // get the type to convert the json into in order to avoid type-erasure
             Type stringMap = new TypeToken<HashMap<String, String>>() { }.getType();
-            Map<String, String> dbInfo = gson.fromJson(json, stringMap);
-            name = dbInfo.get("name");
-            url = dbInfo.get("url");
+            Map<String, String> databaseInfo = gson.fromJson(json, stringMap);
+            name = databaseInfo.get("name");
+            url = databaseInfo.get("url");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     /**
-     *
+     * Helper method to print the names of the tables in the database, and the number of rows in each table.
      */
     private void printTablesRowCount() {
         try (Connection connection = getConnection()) {
-            // get the names of all tables in the db
+            // get the names of all tables in the database
             Statement statement = connection.createStatement();
             String query = """
                     SELECT name
@@ -70,9 +74,9 @@ public class Database {
     }
 
     /**
-     *
+     * Helper method to create a new database, and add a table for storing user login details.
      */
-    private void createDB() {
+    private void createDatabase() {
         // a new database is created when connecting if it doesn't already exist
         try (Connection connection = getConnection()) {
             Statement statement = connection.createStatement();
@@ -94,11 +98,11 @@ public class Database {
     }
 
     /**
-     *
+     * Helper method to delete the database.
      */
-    private void deleteDB() {
-        File dbFile = new File("resources/" + name);
-        if (dbFile.delete()) {
+    private void deleteDatabase() {
+        File databaseFile = new File("resources/" + name);
+        if (databaseFile.delete()) {
             System.out.println("Deleted database " + name + ".");
         } else {
             System.out.println("Unable to delete database " + name);
@@ -106,46 +110,35 @@ public class Database {
     }
 
     /**
-     *
-     * @return
+     * Returns an established connection to the database.
+     * @return a connection to the database.
      */
-    public Connection getConnection() {
-        Connection connection = null;
-
-        try {
-            connection = DriverManager.getConnection(url);
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-            e.printStackTrace();
-        }
-
-        return connection;
+    public Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(url);
     }
 
 
     /**
-     *
+     * Creates a new database if one doesn't already exist. If a database already exists, info about its tables
+     * will be printed, and the user will be given the opportunity to recreate a new empty database.
      */
-    public void setupDB() {
-        File dbFile = new File("resources/" + name);
+    public void setupDatabase() throws IOException {
+        File databaseFile = new File("resources/" + name);
 
-        if (dbFile.exists()) {
-            Scanner in = new Scanner(System.in);
+        if (!databaseFile.exists()) {
+            createDatabase();
+            return;
+        }
 
-            System.out.println("Database " + name + " already exists.");
-            printTablesRowCount();
-            System.out.print("Do you want to delete and recreate it from a template? Y/N: ");
+        System.out.println("Database " + name + " already exists.");
+        printTablesRowCount();
+        System.out.print("Do you want to delete and recreate it from a template? Y/N: ");
 
-            if (in.nextLine().equalsIgnoreCase("y")) {
-                deleteDB();
-                createDB();
-            } else {
-                System.out.println("Continuing with existing database.");
-            }
-
+        if (InputReader.readLine().equalsIgnoreCase("y")) {
+            deleteDatabase();
+            createDatabase();
         } else {
-            createDB();
+            System.out.println("Continuing with existing database.");
         }
     }
-
 }
