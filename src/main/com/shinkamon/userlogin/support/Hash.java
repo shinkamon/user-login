@@ -1,14 +1,28 @@
+package com.shinkamon.userlogin.support;
+
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
+/**
+ *
+ */
 public class Hash {
+    /**
+     *
+     * @param input
+     * @return
+     */
     private static String getHexString(final byte[] input) {
         BigInteger num = new BigInteger(1, input);
         return num.toString(16);
     }
 
+    /**
+     *
+     * @return
+     */
     public static String getSalt() {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[16];
@@ -17,6 +31,12 @@ public class Hash {
         return new String(salt);
     }
 
+    /**
+     *
+     * @param input
+     * @param salt
+     * @return
+     */
     public static String getSHA512Hash(final String input, final String salt) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA512");

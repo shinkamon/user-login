@@ -1,7 +1,20 @@
+package com.shinkamon.userlogin.database;
+
+import com.shinkamon.userlogin.support.Hash;
+
 import java.sql.*;
 import java.util.Scanner;
 
+/**
+ *
+ */
 public class UserLogin {
+    /**
+     *
+     * @param username
+     * @param passwordHash
+     * @return
+     */
     private static boolean isValidCredentials(final String username, final String passwordHash) {
         try (Connection connection = Database.INSTANCE.getConnection()) {
             if (hasUser(username, connection)) {
@@ -20,6 +33,13 @@ public class UserLogin {
         return false;
     }
 
+    /**
+     *
+     * @param username
+     * @param connection
+     * @return
+     * @throws SQLException
+     */
     private static boolean hasUser(final String username, final Connection connection) throws SQLException {
         String query = "SELECT COUNT(*) FROM users WHERE username = ?";
         PreparedStatement statement = connection.prepareStatement(query);
@@ -29,6 +49,13 @@ public class UserLogin {
         return count > 0;
     }
 
+    /**
+     *
+     * @param username
+     * @param passwordHash
+     * @param passwordSalt
+     * @return
+     */
     private static boolean addUserToDB(final String username, final String passwordHash, final String passwordSalt) {
         try (Connection connection = Database.INSTANCE.getConnection()) {
             if (!hasUser(username, connection)) {
@@ -48,6 +75,10 @@ public class UserLogin {
         return false;
     }
 
+    /**
+     *
+     * @param in
+     */
     private static void addNewUser(Scanner in) {
         String username;
         String passwordHash;
@@ -62,6 +93,11 @@ public class UserLogin {
         } while (!addUserToDB(username,  passwordHash, passwordSalt));
     }
 
+    /**
+     *
+     * @param username
+     * @return
+     */
     private static String getSalt(final String username) {
         try (Connection connection = Database.INSTANCE.getConnection()) {
             if (hasUser(username, connection)) {
@@ -80,11 +116,9 @@ public class UserLogin {
         return "";
     }
 
-    //TODO: change all password (and username? Salt?) variables in project to byte[] instead of string
-    //TODO: use an abstract layer for Console to enable hidden password input:
-    //http://illegalargumentexception.blogspot.com/2010/09/java-systemconsole-ides-and-testing.html
-    //TODO: regex to only accept correct username and password formats
-    //TODO: update format and coloring of text
+    /**
+     *
+     */
     public static void login() {
         Scanner in = new Scanner(System.in);
         String username;

@@ -1,3 +1,5 @@
+package com.shinkamon.userlogin.database;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -12,6 +14,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+/**
+ *
+ */
 public class Database {
     public static final Database INSTANCE = new Database();
     private String name;
@@ -32,6 +37,9 @@ public class Database {
         }
     }
 
+    /**
+     *
+     */
     private void printTablesRowCount() {
         try (Connection connection = getConnection()) {
             // get the names of all tables in the db
@@ -61,6 +69,9 @@ public class Database {
         }
     }
 
+    /**
+     *
+     */
     private void createDB() {
         // a new database is created when connecting if it doesn't already exist
         try (Connection connection = getConnection()) {
@@ -82,6 +93,9 @@ public class Database {
 
     }
 
+    /**
+     *
+     */
     private void deleteDB() {
         File dbFile = new File("resources/" + name);
         if (dbFile.delete()) {
@@ -91,6 +105,10 @@ public class Database {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     public Connection getConnection() {
         Connection connection = null;
 
@@ -105,7 +123,9 @@ public class Database {
     }
 
 
-
+    /**
+     *
+     */
     public void setupDB() {
         File dbFile = new File("resources/" + name);
 
