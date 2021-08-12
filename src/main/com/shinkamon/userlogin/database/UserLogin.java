@@ -74,12 +74,15 @@ public class UserLogin {
                 statement.setString(3, passwordSalt);
                 statement.executeUpdate();
 
+                System.out.println("New user registered.");
                 return true;
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
         }
+
+        System.out.println("Failed to register user.");
         return false;
     }
 
