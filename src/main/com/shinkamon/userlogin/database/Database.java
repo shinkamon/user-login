@@ -119,14 +119,20 @@ public final class Database {
 
 
     /**
-     * Creates a new database if one doesn't already exist. If a database already exists, info about its tables
-     * will be printed, and the user will be given the opportunity to recreate a new empty database.
+     * Creates a new database if one doesn't already exist. If recreate is set to true, info about the database and
+     * its tables will be printed, and the user will be given the opportunity to recreate a new empty database.
+     * @param recreate whether to give the user the choice to recreate the database or not.
+     * @throws IOException if an I/O error occurs.
      */
-    public void setupDatabase() throws IOException {
+    public void setupDatabase(boolean recreate) throws IOException {
         File databaseFile = new File("resources/" + name);
 
         if (!databaseFile.exists()) {
             createDatabase();
+            return;
+        }
+
+        if (!recreate) {
             return;
         }
 
