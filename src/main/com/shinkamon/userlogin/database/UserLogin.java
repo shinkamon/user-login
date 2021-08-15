@@ -5,6 +5,8 @@ import com.shinkamon.userlogin.support.InputReader;
 
 import java.io.IOException;
 import java.sql.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Handles user login using static methods.
@@ -56,6 +58,72 @@ public class UserLogin {
     }
 
     /**
+     * Helper method that checks whether given input matches to given regular expression.
+     * @param input the String to check.
+     * @param regex the regular expression to match against as a String.
+     * @return whether the input matches the regular expression as a boolean.
+     */
+    private static boolean validateInput(String input, String regex) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+
+        return matcher.matches();
+    }
+
+    /**
+     * Helper method to read a new username from the console. Will repeatedly ask for input until a valid
+     * username is given.
+     * @return a valid username as a String.
+     * @throws IOException if an I/O error occurs.
+     */
+    private static String readNewUsername() throws IOException {
+        String username;
+        // can only contain alphanumeric characters and underscores, and must be between 3-30 characters long
+        String regex = "^\\w{3,30}$";
+
+        while (true) {
+            System.out.print("  username: ");
+            username = InputReader.readLine();
+
+            if (validateInput(username, regex)) {
+                return username;
+            }
+
+            System.out.println("Invalid username. Can only contain alphanumeric characters and underscores, ");
+            System.out.println("and must be between 3 and 30 characters long.");
+        }
+    }
+
+    /**
+     * Helper method to read a new password from the console. Will repeatedly ask for input until a valid
+     * password is given.
+     * @return a valid password as a char[].
+     * @throws IOException if an I/O error occurs.
+     */
+    private static char[] readNewPassword() throws IOException {
+        char[] password;
+        // (?=.*[a-zA-z]) must contain at least one letter
+        // (?=.*\d) must contain at least one digit
+        // (?=\S+$) must contain only non-whitespace characters
+        // .{8,50} must be between 8-50 characters long
+        String regex = "^(?=.*[a-zA-z])(?=.*\\d)(?=\\S+$).{8,50}$";
+
+        while (true) {
+            System.out.print("  password: ");
+            // since System.console doesn't work in an IDE we can't just use Console#readPassword()
+            // instead we use our own reader to account for this while still masking input when run from a console
+            password = InputReader.readPassword();
+
+            if (validateInput(new String(password), regex)) {
+                return password;
+            }
+
+            System.out.println("Invalid password. Must contain at least one letter and one digit,");
+            System.out.println("cannot contain any whitespaces, and must be between 8 and 50 characters long.");
+        }
+    }
+
+    /**
      * Helper method to try to add a new user to the database. Will fail if a user with the supplied username
      * is already registered in the database.
      * @param username the username to register.
@@ -66,17 +134,20 @@ public class UserLogin {
     private static boolean addUserToDatabase(final String username, final String passwordHash,
                                              final String passwordSalt) {
         try (Connection connection = Database.INSTANCE.getConnection()) {
-            if (!hasUser(username, connection)) {
-                String query = "INSERT INTO users VALUES(?, ?, ?)";
-                PreparedStatement statement = connection.prepareStatement(query);
-                statement.setString(1, username);
-                statement.setString(2, passwordHash);
-                statement.setString(3, passwordSalt);
-                statement.executeUpdate();
-
-                System.out.println("New user registered.");
-                return true;
+            if (hasUser(username, connection)) {
+                System.out.println("That username is already taken.");
+                return false;
             }
+
+            String query = "INSERT INTO users VALUES(?, ?, ?)";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, username);
+            statement.setString(2, passwordHash);
+            statement.setString(3, passwordSalt);
+            statement.executeUpdate();
+
+            System.out.println("New user registered.");
+            return true;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
@@ -97,12 +168,9 @@ public class UserLogin {
 
         do {
             System.out.println("Enter a new username and password to register.");
-            System.out.print("  username: ");
-            username = InputReader.readLine();
-            System.out.print("  password: ");
-            // since System.console doesn't work in an IDE we can't just use Console#readPassword()
-            // instead we use our own reader to account for this while still masking input when run from a console
-            passwordHash = Hash.getSHA512Hash(InputReader.readPassword(), passwordSalt);
+            username = readNewUsername();
+            passwordHash = Hash.getSHA512Hash(readNewPassword(), passwordSalt);
+
         } while (!addUserToDatabase(username,  passwordHash, passwordSalt));
     }
 
