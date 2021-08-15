@@ -25,7 +25,7 @@ public class Hash {
      * Method to get a randomly generated salt.
      * @return randomly generated salt as a String.
      */
-    public static String getSalt() {
+    public static String getRandomSalt() {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[16];
         random.nextBytes(salt);

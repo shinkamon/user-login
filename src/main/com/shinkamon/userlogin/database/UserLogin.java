@@ -93,7 +93,7 @@ public class UserLogin {
     private static void addNewUser() throws IOException {
         String username;
         String passwordHash;
-        String passwordSalt = Hash.getSalt();
+        String passwordSalt = Hash.getRandomSalt();
 
         do {
             System.out.println("Enter a new username and password to register.");
