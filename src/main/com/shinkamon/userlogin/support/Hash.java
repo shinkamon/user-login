@@ -22,7 +22,7 @@ public class Hash {
     }
 
     /**
-     * Method to get a randomly generated salt.
+     * Returns a randomly generated salt.
      * @return randomly generated salt as a String.
      */
     public static String getRandomSalt() {
@@ -34,7 +34,7 @@ public class Hash {
     }
 
     /**
-     * Method to generate a hash of the input and salt using the SHA-512 algorithm.
+     * Returns a hash of the input and salt using the SHA-512 algorithm.
      * @param input user input, typically a password.
      * @param salt a randomized salt to increase security.
      * @return a hashed String of the input and salt.

@@ -58,7 +58,7 @@ public class UserLogin {
     }
 
     /**
-     * Helper method that checks whether given input matches to given regular expression.
+     * Helper method that checks whether given input matches given regular expression.
      * @param input the String to check.
      * @param regex the regular expression to match against as a String.
      * @return whether the input matches the regular expression as a boolean.

@@ -5,8 +5,6 @@ import com.shinkamon.userlogin.database.UserLogin;
 
 import java.io.IOException;
 
-//TODO: regex to only accept correct username and password formats
-//TODO: update format and coloring of text
 public class Main {
     /**
      * Main method for user login.
