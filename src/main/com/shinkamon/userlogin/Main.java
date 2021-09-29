@@ -15,7 +15,8 @@ public class Main {
      * @throws IOException if an I/O error occurs.
      */
     public static void main(final String... args) throws IOException {
+        UserLogin userLogin = new UserLogin();
         Database.INSTANCE.setupDatabase(true);
-        UserLogin.login();
+        userLogin.login();
     }
 }

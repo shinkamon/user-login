@@ -4,15 +4,25 @@ import com.shinkamon.userlogin.support.Hash;
 import com.shinkamon.userlogin.support.InputReader;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.sql.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Handles user login using static methods.
- * Enables the registration of new users as well as authenticating existing users.
+ * Handles user login by enabling the registration of new users
+ * as well as authentication of existing users.
  */
 public class UserLogin {
+    private final Hash hash;
+
+    /**
+     * Instantiates a new UserLogin.
+     */
+    public UserLogin() {
+        this.hash = new Hash(new SecureRandom());
+    }
+
     /**
      * Helper method to check whether a username and a hashed password are valid.
      * E.g. the username belongs to a registered user and the hashed password is the
@@ -21,7 +31,7 @@ public class UserLogin {
      * @param passwordHash the hashed password to validate.
      * @return whether the credentials are valid or not as a boolean.
      */
-    private static boolean isValidCredentials(final String username, final String passwordHash) {
+    private boolean isValidCredentials(final String username, final String passwordHash) {
         try (Connection connection = Database.INSTANCE.getConnection()) {
             if (hasUser(username, connection)) {
                 String query = "SELECT password_hash FROM users WHERE username = ?";
@@ -48,7 +58,7 @@ public class UserLogin {
      * @return whether the username exists or not as a boolean.
      * @throws SQLException if a database access error occurs.
      */
-    private static boolean hasUser(final String username, final Connection connection)
+    private boolean hasUser(final String username, final Connection connection)
             throws SQLException {
         String query = "SELECT COUNT(*) FROM users WHERE username = ?";
         PreparedStatement statement = connection.prepareStatement(query);
@@ -63,7 +73,7 @@ public class UserLogin {
      * @param regex the regular expression to match against as a String.
      * @return whether the input matches the regular expression as a boolean.
      */
-    private static boolean validateInput(String input, String regex) {
+    private boolean validateInput(String input, String regex) {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
         return matcher.matches();
@@ -75,7 +85,7 @@ public class UserLogin {
      * @return a valid username as a String.
      * @throws IOException if an I/O error occurs.
      */
-    private static String readNewUsername() throws IOException {
+    private String readNewUsername() throws IOException {
         String username;
         // can only contain alphanumeric characters and underscores,
         // and must be between 3-30 characters long
@@ -100,7 +110,7 @@ public class UserLogin {
      * @return a valid password as a char[].
      * @throws IOException if an I/O error occurs.
      */
-    private static char[] readNewPassword() throws IOException {
+    private char[] readNewPassword() throws IOException {
         char[] password;
         // (?=.*[a-zA-z]) must contain at least one letter
         // (?=.*\d) must contain at least one digit
@@ -133,7 +143,7 @@ public class UserLogin {
      * @param passwordSalt the salt needed to generate the hashed password.
      * @return whether the user was successfully added or not as a boolean.
      */
-    private static boolean addUserToDatabase(final String username, final String passwordHash,
+    private boolean addUserToDatabase(final String username, final String passwordHash,
                                              final String passwordSalt) {
         try (Connection connection = Database.INSTANCE.getConnection()) {
             if (hasUser(username, connection)) {
@@ -163,15 +173,15 @@ public class UserLogin {
      * Helper method to register a new user.
      * @throws IOException if an I/O error occurs.
      */
-    private static void addNewUser() throws IOException {
+    private void addNewUser() throws IOException {
         String username;
         String passwordHash;
-        String passwordSalt = Hash.getRandomSalt();
+        String passwordSalt = hash.getRandomSalt();
 
         do {
             System.out.println("Enter a new username and password to register.");
             username = readNewUsername();
-            passwordHash = Hash.getSHA512Hash(readNewPassword(), passwordSalt);
+            passwordHash = hash.getSHA512Hash(readNewPassword(), passwordSalt);
 
         } while (!addUserToDatabase(username,  passwordHash, passwordSalt));
     }
@@ -182,7 +192,7 @@ public class UserLogin {
      * @param username the username associated with the salt.
      * @return the salt as a String, or an empty String if the supplied username doesn't exist.
      */
-    private static String getSalt(final String username) {
+    private String getSalt(final String username) {
         try (Connection connection = Database.INSTANCE.getConnection()) {
             if (hasUser(username, connection)) {
                 String query = "SELECT password_salt FROM users WHERE username = ?";
@@ -204,7 +214,7 @@ public class UserLogin {
      * Also allows for the registration of new users.
      * @throws IOException if an I/O error occurs.
      */
-    public static void login() throws IOException {
+    public void login() throws IOException {
         String username;
         String passwordHash;
 
@@ -217,7 +227,7 @@ public class UserLogin {
         System.out.print("  username: ");
         username = InputReader.readLine();
         System.out.print("  password: ");
-        passwordHash = Hash.getSHA512Hash(InputReader.readPassword(), getSalt(username));
+        passwordHash = hash.getSHA512Hash(InputReader.readPassword(), getSalt(username));
 
         if (isValidCredentials(username, passwordHash)) {
             System.out.println("Authenticated.");

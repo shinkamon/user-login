@@ -7,16 +7,25 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 /**
- * Static support class to generate a hashed String; also provides a method to generate
- * a random salt, and hashes require a salt to increase security against rainbow tables.
+ * Support class to generate a hashed String; also provides a method to generate a random salt,
+ * which is required when generating a hash to increase security against rainbow tables.
  */
 public class Hash {
+    private final SecureRandom random;
+
+    /**
+     * Instantiates a new HashGenerator.
+     * @param random a SecureRandom that is used to generate random salts for hashes.
+     */
+    public Hash(SecureRandom random) {
+        this.random = random;
+    }
     /**
      * Helper method to convert a generated hash from byte[] to a String.
      * @param input a generated hash.
      * @return a String of the hash in hexadecimal form.
      */
-    private static String getHexString(final byte[] input) {
+    private String getHexString(final byte[] input) {
         BigInteger num = new BigInteger(1, input);
         return num.toString(16);
     }
@@ -25,11 +34,10 @@ public class Hash {
      * Returns a randomly generated salt.
      * @return randomly generated salt as a String.
      */
-    public static String getRandomSalt() {
-        SecureRandom random = new SecureRandom();
+    public String getRandomSalt() {
         byte[] salt = new byte[16];
         random.nextBytes(salt);
-        return new String(salt);
+        return new String(salt, StandardCharsets.UTF_8);
     }
 
     /**
@@ -38,7 +46,7 @@ public class Hash {
      * @param salt a randomized salt to increase security.
      * @return a hashed String of the input and salt.
      */
-    public static String getSHA512Hash(final char[] input, final String salt) {
+    public String getSHA512Hash(final char[] input, final String salt) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA512");
             byte[] digest;
