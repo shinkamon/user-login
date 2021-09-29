@@ -15,8 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Singleton class that provides access to a database for registered users. Access is provided through the
- * public field INSTANCE.
+ * Singleton class that provides access to a database for registered users;
+ * access is provided through the public field INSTANCE.
  */
 public final class Database {
     /**
@@ -42,7 +42,8 @@ public final class Database {
     }
 
     /**
-     * Helper method to print the names of the tables in the database, and the number of rows in each table.
+     * Helper method to print the names of the tables in the database,
+     * and the number of rows in each table.
      */
     private void printTablesRowCount() {
         try (Connection connection = getConnection()) {
@@ -119,8 +120,9 @@ public final class Database {
 
 
     /**
-     * Creates a new database if one doesn't already exist. If recreate is set to true, info about the database and
-     * its tables will be printed, and the user will be given the opportunity to recreate a new empty database.
+     * Creates a new database if one doesn't already exist. If recreate is set to true,
+     * info about the database and its tables will be printed, and the user will be given
+     * the opportunity to recreate a new empty database.
      * @param recreate whether to give the user the choice to recreate the database or not.
      * @throws IOException if an I/O error occurs.
      */

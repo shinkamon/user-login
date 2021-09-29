@@ -7,8 +7,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 /**
- * Static support class to generate a hashed String. Also provides a method to generate a random salt,
- * and hashes require a salt to increase security against rainbow tables.
+ * Static support class to generate a hashed String; also provides a method to generate
+ * a random salt, and hashes require a salt to increase security against rainbow tables.
  */
 public class Hash {
     /**
@@ -29,7 +29,6 @@ public class Hash {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[16];
         random.nextBytes(salt);
-
         return new String(salt);
     }
 

@@ -3,9 +3,9 @@ package com.shinkamon.userlogin.support;
 import java.io.*;
 
 /**
- * Static support class to read console input. Uses {@link java.lang.System#console()} to mask password input.
- * However, since {@link java.lang.System#console()} is not available when running from an IDE, an alternative
- * reader is provided in such cases, but passwords will not be masked.
+ * Static support class to read console input; uses {@link java.lang.System#console()} to mask
+ * password input. However, since {@link java.lang.System#console()} is not available when running
+ * from an IDE, an alternative reader is provided in such cases, but passwords will not be masked.
  */
 public class InputReader {
     /**
@@ -17,6 +17,7 @@ public class InputReader {
         if (System.console() != null) {
             return System.console().readLine();
         }
+
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         return reader.readLine();
     }
@@ -31,6 +32,7 @@ public class InputReader {
         if (System.console() != null) {
             return System.console().readPassword();
         }
+
         return readLine().toCharArray();
     }
 }

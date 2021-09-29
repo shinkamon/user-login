@@ -40,20 +40,20 @@ public class UserLogin {
     }
 
     /**
-     * Helper method that checks whether a username is registered. E.g. checks whether the username is
-     * in the database. Takes an already established {@link java.sql.Connection} to the database as a
-     * parameter to avoid opening a new connection.
+     * Helper method that checks whether a username is registered; e.g. checks whether the username
+     * is in the database.Takes an already established {@link java.sql.Connection} to the database
+     * as a parameter to avoid opening a new connection.
      * @param username the username to check.
      * @param connection a connection to the database.
      * @return whether the username exists or not as a boolean.
      * @throws SQLException if a database access error occurs.
      */
-    private static boolean hasUser(final String username, final Connection connection) throws SQLException {
+    private static boolean hasUser(final String username, final Connection connection)
+            throws SQLException {
         String query = "SELECT COUNT(*) FROM users WHERE username = ?";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setString(1, username);
         int count = statement.executeQuery().getInt(1);
-
         return count > 0;
     }
 
@@ -66,19 +66,19 @@ public class UserLogin {
     private static boolean validateInput(String input, String regex) {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
-
         return matcher.matches();
     }
 
     /**
-     * Helper method to read a new username from the console. Will repeatedly ask for input until a valid
-     * username is given.
+     * Helper method to read a new username from the console. Will repeatedly ask for input until
+     * a valid username is given.
      * @return a valid username as a String.
      * @throws IOException if an I/O error occurs.
      */
     private static String readNewUsername() throws IOException {
         String username;
-        // can only contain alphanumeric characters and underscores, and must be between 3-30 characters long
+        // can only contain alphanumeric characters and underscores,
+        // and must be between 3-30 characters long
         String regex = "^\\w{3,30}$";
 
         while (true) {
@@ -89,14 +89,14 @@ public class UserLogin {
                 return username;
             }
 
-            System.out.println("Invalid username. Can only contain alphanumeric characters and underscores, ");
-            System.out.println("and must be between 3 and 30 characters long.");
+            System.out.println("Invalid username. Can only contain alphanumeric characters and");
+            System.out.println("underscores, and must be between 3 and 30 characters long.");
         }
     }
 
     /**
-     * Helper method to read a new password from the console. Will repeatedly ask for input until a valid
-     * password is given.
+     * Helper method to read a new password from the console;
+     * Will repeatedly ask for input until a valid password is given.
      * @return a valid password as a char[].
      * @throws IOException if an I/O error occurs.
      */
@@ -111,7 +111,8 @@ public class UserLogin {
         while (true) {
             System.out.print("  password: ");
             // since System.console doesn't work in an IDE we can't just use Console#readPassword()
-            // instead we use our own reader to account for this while still masking input when run from a console
+            // instead we use our own reader to account for this
+            // while still masking input when run from a console
             password = InputReader.readPassword();
 
             if (validateInput(new String(password), regex)) {
@@ -119,13 +120,14 @@ public class UserLogin {
             }
 
             System.out.println("Invalid password. Must contain at least one letter and one digit,");
-            System.out.println("cannot contain any whitespaces, and must be between 8 and 50 characters long.");
+            System.out.println("cannot contain any whitespaces, " +
+                    "and must be between 8 and 50 characters long.");
         }
     }
 
     /**
-     * Helper method to try to add a new user to the database. Will fail if a user with the supplied username
-     * is already registered in the database.
+     * Helper method to try to add a new user to the database; will fail if a user with the
+     * supplied username is already registered in the database.
      * @param username the username to register.
      * @param passwordHash the hashed password to register.
      * @param passwordSalt the salt needed to generate the hashed password.
@@ -187,7 +189,6 @@ public class UserLogin {
                 PreparedStatement statement = connection.prepareStatement(query);
                 statement.setString(1, username);
                 ResultSet resultSet = statement.executeQuery();
-
                 return resultSet.getString(1);
             }
         } catch (SQLException e) {
