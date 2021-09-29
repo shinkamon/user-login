@@ -10,14 +10,14 @@ import java.security.SecureRandom;
  * Support class to generate a hashed String; also provides a method to generate a random salt,
  * which is required when generating a hash to increase security against rainbow tables.
  */
-public class Hash {
+public class HashGenerator {
     private final SecureRandom random;
 
     /**
      * Instantiates a new HashGenerator.
      * @param random a SecureRandom that is used to generate random salts for hashes.
      */
-    public Hash(SecureRandom random) {
+    public HashGenerator(SecureRandom random) {
         this.random = random;
     }
     /**

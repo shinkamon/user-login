@@ -1,6 +1,6 @@
 package com.shinkamon.userlogin.database;
 
-import com.shinkamon.userlogin.support.Hash;
+import com.shinkamon.userlogin.support.HashGenerator;
 import com.shinkamon.userlogin.support.InputReader;
 
 import java.io.IOException;
@@ -14,13 +14,13 @@ import java.util.regex.Pattern;
  * as well as authentication of existing users.
  */
 public class UserLogin {
-    private final Hash hash;
+    private final HashGenerator hashGenerator;
 
     /**
      * Instantiates a new UserLogin.
      */
     public UserLogin() {
-        this.hash = new Hash(new SecureRandom());
+        this.hashGenerator = new HashGenerator(new SecureRandom());
     }
 
     /**
@@ -176,12 +176,12 @@ public class UserLogin {
     private void addNewUser() throws IOException {
         String username;
         String passwordHash;
-        String passwordSalt = hash.getRandomSalt();
+        String passwordSalt = hashGenerator.getRandomSalt();
 
         do {
             System.out.println("Enter a new username and password to register.");
             username = readNewUsername();
-            passwordHash = hash.getSHA512Hash(readNewPassword(), passwordSalt);
+            passwordHash = hashGenerator.getSHA512Hash(readNewPassword(), passwordSalt);
 
         } while (!addUserToDatabase(username,  passwordHash, passwordSalt));
     }
@@ -227,7 +227,7 @@ public class UserLogin {
         System.out.print("  username: ");
         username = InputReader.readLine();
         System.out.print("  password: ");
-        passwordHash = hash.getSHA512Hash(InputReader.readPassword(), getSalt(username));
+        passwordHash = hashGenerator.getSHA512Hash(InputReader.readPassword(), getSalt(username));
 
         if (isValidCredentials(username, passwordHash)) {
             System.out.println("Authenticated.");
