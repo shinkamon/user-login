@@ -5,6 +5,9 @@ import com.shinkamon.userlogin.database.UserLogin;
 
 import java.io.IOException;
 
+/**
+ * Main class that demonstrates user login system.
+ */
 public class Main {
     /**
      * Main method for user login.
